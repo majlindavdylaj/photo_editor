@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_editor/providers/app_image_provider.dart';
 import 'package:photo_editor/screens/crop_screen.dart';
+import 'package:photo_editor/screens/filter_screen.dart';
 import 'package:photo_editor/screens/home_screen.dart';
 import 'package:photo_editor/screens/start_screen.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,8 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/': (_) => const StartScreen(),
         '/home': (_) => const HomeScreen(),
-        '/crop': (_) => const CropScreen()
+        '/crop': (_) => const CropScreen(),
+        '/filter': (_) => const FilterScreen()
       },
       initialRoute: '/',
     );

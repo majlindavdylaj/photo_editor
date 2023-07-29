@@ -55,6 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.of(context).pushNamed('/crop');
                   }
                 ),
+                _bottomBatItem(Icons.filter_vintage_outlined, 'Filters',
+                  onPress: () {
+                    Navigator.of(context).pushNamed('/filter');
+                  }
+                ),
               ],
             ),
           ),

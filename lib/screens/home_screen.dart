@@ -60,6 +60,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.of(context).pushNamed('/filter');
                   }
                 ),
+                _bottomBatItem(Icons.tune, 'Adjust',
+                    onPress: () {
+                      Navigator.of(context).pushNamed('/adjust');
+                    }
+                ),
               ],
             ),
           ),

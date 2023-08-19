@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_editor/providers/app_image_provider.dart';
+import 'package:photo_editor/screens/adjust_screen.dart';
 import 'package:photo_editor/screens/crop_screen.dart';
 import 'package:photo_editor/screens/filter_screen.dart';
 import 'package:photo_editor/screens/home_screen.dart';
@@ -30,13 +31,17 @@ class MyApp extends StatelessWidget {
           color: Colors.black,
           centerTitle: true,
           elevation: 0
+        ),
+        sliderTheme: const SliderThemeData(
+          showValueIndicator: ShowValueIndicator.always
         )
       ),
       routes: <String, WidgetBuilder>{
         '/': (_) => const StartScreen(),
         '/home': (_) => const HomeScreen(),
         '/crop': (_) => const CropScreen(),
-        '/filter': (_) => const FilterScreen()
+        '/filter': (_) => const FilterScreen(),
+        '/adjust': (_) => const AdjustScreen()
       },
       initialRoute: '/',
     );

@@ -70,6 +70,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.of(context).pushNamed('/fit');
                     }
                 ),
+                _bottomBatItem(Icons.border_color_outlined, 'Tint',
+                    onPress: () {
+                      Navigator.of(context).pushNamed('/tint');
+                    }
+                ),
+                _bottomBatItem(Icons.blur_circular, 'Blur',
+                    onPress: () {
+                      Navigator.of(context).pushNamed('/blur');
+                    }
+                ),
               ],
             ),
           ),

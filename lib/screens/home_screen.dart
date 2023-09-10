@@ -80,6 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.of(context).pushNamed('/blur');
                     }
                 ),
+                _bottomBatItem(Icons.emoji_emotions_outlined, 'Sticker',
+                    onPress: () {
+                      Navigator.of(context).pushNamed('/sticker');
+                    }
+                ),
               ],
             ),
           ),

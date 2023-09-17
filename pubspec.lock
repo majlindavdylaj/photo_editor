@@ -445,6 +445,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  text_editor:
+    dependency: "direct main"
+    description:
+      name: text_editor
+      sha256: "944e68a16dd612da10ab324d69fe64dc70f37f20a8e7200b830ebbddc7ec42dd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.0"
   typed_data:
     dependency: transitive
     description:

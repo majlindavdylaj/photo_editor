@@ -85,6 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.of(context).pushNamed('/sticker');
                     }
                 ),
+                _bottomBatItem(Icons.text_fields, 'Text',
+                    onPress: () {
+                      Navigator.of(context).pushNamed('/text');
+                    }
+                ),
               ],
             ),
           ),

@@ -3,6 +3,7 @@ import 'package:photo_editor/providers/app_image_provider.dart';
 import 'package:photo_editor/screens/adjust_screen.dart';
 import 'package:photo_editor/screens/blur_screen.dart';
 import 'package:photo_editor/screens/crop_screen.dart';
+import 'package:photo_editor/screens/draw_screen.dart';
 import 'package:photo_editor/screens/filter_screen.dart';
 import 'package:photo_editor/screens/fit_screen.dart';
 import 'package:photo_editor/screens/home_screen.dart';
@@ -52,7 +53,8 @@ class MyApp extends StatelessWidget {
         '/tint': (_) => const TintScreen(),
         '/blur': (_) => const BlurScreen(),
         '/sticker': (_) => const StickerScreen(),
-        '/text': (_) => const TextScreen()
+        '/text': (_) => const TextScreen(),
+        '/draw': (_) => const DrawScreen()
       },
       initialRoute: '/',
     );

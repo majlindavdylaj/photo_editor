@@ -38,8 +38,9 @@ dependencies:
   blur: ^3.1.0
   pixel_color_picker: ^1.0.0
   flutter_colorpicker: ^1.0.3
-  lindi_sticker_widget: ^0.0.4
+  lindi_sticker_widget: ^0.1.1
   text_editor: ^0.7.0
+  painter: ^2.0.0
 
 dev_dependencies:
   flutter_test:

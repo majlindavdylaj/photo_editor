@@ -7,6 +7,7 @@ import 'package:photo_editor/screens/draw_screen.dart';
 import 'package:photo_editor/screens/filter_screen.dart';
 import 'package:photo_editor/screens/fit_screen.dart';
 import 'package:photo_editor/screens/home_screen.dart';
+import 'package:photo_editor/screens/mask_screen.dart';
 import 'package:photo_editor/screens/start_screen.dart';
 import 'package:photo_editor/screens/sticker_screen.dart';
 import 'package:photo_editor/screens/text_screen.dart';
@@ -54,7 +55,8 @@ class MyApp extends StatelessWidget {
         '/blur': (_) => const BlurScreen(),
         '/sticker': (_) => const StickerScreen(),
         '/text': (_) => const TextScreen(),
-        '/draw': (_) => const DrawScreen()
+        '/draw': (_) => const DrawScreen(),
+        '/mask': (_) => const MaskScreen()
       },
       initialRoute: '/',
     );

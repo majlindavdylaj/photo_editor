@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:photo_editor/providers/app_image_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +11,36 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  late AppImageProvider appImageProvider;
+
+  @override
+  void initState() {
+    appImageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    super.initState();
+  }
+
+  _savePhoto() async {
+    final result = await ImageGallerySaver.saveImage(
+        appImageProvider.currentImage!,
+        quality: 100,
+        name: "${DateTime.now().millisecondsSinceEpoch}");
+    if(!mounted) return false;
+    if(result['isSuccess']){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Image saved to Gallery'),
+        )
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong!'),
+          )
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,24 +53,65 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: (){},
+            onPressed: (){
+              _savePhoto();
+            },
             child: const Text('Save')
           )
         ],
       ),
-      body: Center(
-        child: Consumer<AppImageProvider>(
-          builder: (BuildContext context, value, Widget? child){
-            if(value.currentImage != null){
-              return Image.memory(
-                  value.currentImage!,
-              );
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        ),
+      body: Stack(
+        children: [
+          Center(
+            child: Consumer<AppImageProvider>(
+              builder: (BuildContext context, value, Widget? child){
+                if(value.currentImage != null){
+                  return Image.memory(
+                      value.currentImage!,
+                  );
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              margin: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.black
+              ),
+              child: Consumer<AppImageProvider>(
+                builder: (context, value, child) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          appImageProvider.undo();
+                        },
+                        icon: Icon(Icons.undo,
+                            color: value.canUndo ? Colors.white : Colors.white10
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          appImageProvider.redo();
+                        },
+                        icon: Icon(Icons.redo,
+                            color: value.canRedo ? Colors.white : Colors.white10
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              ),
+            ),
+          )
+        ],
       ),
       bottomNavigationBar: Container(
         width: double.infinity,

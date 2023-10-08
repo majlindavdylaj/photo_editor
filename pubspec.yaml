@@ -43,6 +43,7 @@ dependencies:
   painter: ^2.0.0
   widget_mask: ^1.0.0+0
   matrix_gesture_detector: ^0.2.0-nullsafety.1
+  image_gallery_saver: ^2.0.3
 
 dev_dependencies:
   flutter_test:

@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lindi/lindi.dart';
 import 'package:photo_editor/helper/app_image_picker.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({Key? key}) : super(key: key);
@@ -15,11 +15,11 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
 
-  late AppImageProvider imageProvider;
+  late ImageViewHolder imageViewHolder;
 
   @override
   void initState() {
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     super.initState();
   }
 
@@ -30,6 +30,7 @@ class _StartScreenState extends State<StartScreen> {
         children: [
           SizedBox(
             width: double.infinity,
+            height: double.infinity,
             child: Image.asset(
               'assets/images/wallpaper.jpg',
               fit: BoxFit.cover,
@@ -63,8 +64,8 @@ class _StartScreenState extends State<StartScreen> {
                         onPressed: () {
                           AppImagePicker(source: ImageSource.gallery)
                             .pick(onPick: (File? image){
-                                imageProvider.changeImageFile(image!);
-                                Navigator.of(context).pushReplacementNamed('/home');
+                              imageViewHolder.changeImageFile(image!);
+                              Navigator.of(context).pushReplacementNamed('/home');
                             });
                         },
                         child: const Text("Gallery"),
@@ -73,8 +74,8 @@ class _StartScreenState extends State<StartScreen> {
                         onPressed: () {
                           AppImagePicker(source: ImageSource.camera)
                             .pick(onPick: (File? image){
-                                imageProvider.changeImageFile(image!);
-                                Navigator.of(context).pushReplacementNamed('/home');
+                              imageViewHolder.changeImageFile(image!);
+                              Navigator.of(context).pushReplacementNamed('/home');
                             });
                         },
                         child: const Text("Camera"),

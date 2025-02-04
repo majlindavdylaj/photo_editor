@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:lindi/lindi.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,17 +12,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  late AppImageProvider appImageProvider;
+  late ImageViewHolder imageViewHolder;
 
   @override
   void initState() {
-    appImageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     super.initState();
   }
 
   _savePhoto() async {
     final result = await ImageGallerySaver.saveImage(
-        appImageProvider.currentImage!,
+        imageViewHolder.currentImage!,
         quality: 100,
         name: "${DateTime.now().millisecondsSinceEpoch}");
     if(!mounted) return false;
@@ -63,11 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           Center(
-            child: Consumer<AppImageProvider>(
-              builder: (BuildContext context, value, Widget? child){
-                if(value.currentImage != null){
+            child: LindiBuilder(
+              viewModel: imageViewHolder,
+              builder: (BuildContext context){
+                if(imageViewHolder.currentImage != null){
                   return Image.memory(
-                      value.currentImage!,
+                    imageViewHolder.currentImage!,
                   );
                 }
                 return const Center(
@@ -84,25 +85,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(20),
                 color: Colors.black
               ),
-              child: Consumer<AppImageProvider>(
-                builder: (context, value, child) {
+              child: LindiBuilder(
+                viewModel: imageViewHolder,
+                builder: (context) {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         onPressed: () {
-                          appImageProvider.undo();
+                          imageViewHolder.undo();
                         },
                         icon: Icon(Icons.undo,
-                            color: value.canUndo ? Colors.white : Colors.white10
+                            color: imageViewHolder.canUndo ? Colors.white : Colors.white10
                         ),
                       ),
                       IconButton(
                         onPressed: () {
-                          appImageProvider.redo();
+                          imageViewHolder.redo();
                         },
                         icon: Icon(Icons.redo,
-                            color: value.canRedo ? Colors.white : Colors.white10
+                            color: imageViewHolder.canRedo ? Colors.white : Colors.white10
                         ),
                       ),
                     ],
@@ -115,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: Container(
         width: double.infinity,
-        height: 60,
+        height: 100,
         color: Colors.black,
         child: SafeArea(
           child: SingleChildScrollView(

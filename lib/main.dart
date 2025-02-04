@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
+import 'package:lindi/lindi.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'package:photo_editor/screens/adjust_screen.dart';
 import 'package:photo_editor/screens/blur_screen.dart';
 import 'package:photo_editor/screens/crop_screen.dart';
@@ -12,15 +13,10 @@ import 'package:photo_editor/screens/start_screen.dart';
 import 'package:photo_editor/screens/sticker_screen.dart';
 import 'package:photo_editor/screens/text_screen.dart';
 import 'package:photo_editor/screens/tint_screen.dart';
-import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => AppImageProvider())
-    ],
-    child: const MyApp())
-  );
+  LindiInjector.register(ImageViewHolder());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +34,21 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(
           color: Colors.black,
           centerTitle: true,
-          elevation: 0
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 22
+          )
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: WidgetStateProperty.all(Colors.blue)
+          )
+        ),
+        iconButtonTheme: IconButtonThemeData(
+            style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.all(Colors.white)
+            )
         ),
         sliderTheme: const SliderThemeData(
           showValueIndicator: ShowValueIndicator.always

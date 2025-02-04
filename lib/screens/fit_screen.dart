@@ -4,12 +4,12 @@ import 'dart:typed_data';
 import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lindi/lindi.dart';
 import 'package:photo_editor/helper/app_color_picker.dart';
 import 'package:photo_editor/helper/app_image_picker.dart';
 import 'package:photo_editor/helper/pixel_color_image.dart';
 import 'package:photo_editor/helper/textures.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'package:screenshot/screenshot.dart';
 import '../model/texture.dart' as t;
 
@@ -22,7 +22,7 @@ class FitScreen extends StatefulWidget {
 
 class _FitScreenState extends State<FitScreen> {
 
-  late AppImageProvider imageProvider;
+  late ImageViewHolder imageViewHolder;
   ScreenshotController screenshotController = ScreenshotController();
 
   late t.Texture currentTexture;
@@ -50,7 +50,7 @@ class _FitScreenState extends State<FitScreen> {
   void initState() {
     textures = Textures().list();
     currentTexture = textures[0];
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     super.initState();
   }
 
@@ -79,7 +79,7 @@ class _FitScreenState extends State<FitScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageProvider.changeImage(bytes!);
+                imageViewHolder.changeImage(bytes!);
                 if(!mounted) return;
                 Navigator.of(context).pop();
               },
@@ -88,11 +88,12 @@ class _FitScreenState extends State<FitScreen> {
         ],
       ),
       body: Center(
-        child: Consumer<AppImageProvider>(
-          builder: (BuildContext context, value, Widget? child) {
-            if (value.currentImage != null) {
-              currentImage = value.currentImage;
-              backgroundImage ??= value.currentImage!;
+        child: LindiBuilder(
+          viewModel: imageViewHolder,
+          builder: (BuildContext context) {
+            if (imageViewHolder.currentImage != null) {
+              currentImage = imageViewHolder.currentImage;
+              backgroundImage ??= imageViewHolder.currentImage!;
               return AspectRatio(
                 aspectRatio: x / y,
                 child: Screenshot(
@@ -124,7 +125,7 @@ class _FitScreenState extends State<FitScreen> {
                             )
                         ),
                       ),
-                      Center(child: Image.memory(value.currentImage!)),
+                      Center(child: Image.memory(imageViewHolder.currentImage!)),
                     ],
                   )
                 ),
@@ -138,7 +139,7 @@ class _FitScreenState extends State<FitScreen> {
       ),
       bottomNavigationBar: Container(
         width: double.infinity,
-        height: 100,
+        height: 140,
         color: Colors.black,
         child: SafeArea(
           child: Column(
@@ -208,7 +209,7 @@ class _FitScreenState extends State<FitScreen> {
     return InkWell(
       onTap: onPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

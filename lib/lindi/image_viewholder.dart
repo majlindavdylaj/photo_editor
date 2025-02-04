@@ -1,11 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:lindi/lindi.dart';
 
-class AppImageProvider extends ChangeNotifier {
-
-  List<Uint8List> _images = [];
+class ImageViewHolder extends LindiViewModel {
+  final List<Uint8List> _images = [];
   int _index = 0;
 
   bool canUndo = false;
@@ -33,7 +32,7 @@ class AppImageProvider extends ChangeNotifier {
       _index++;
     }
     _undoRedo();
-    notifyListeners();
+    notify();
   }
 
   undo(){
@@ -41,7 +40,7 @@ class AppImageProvider extends ChangeNotifier {
       _index--;
     }
     _undoRedo();
-    notifyListeners();
+    notify();
   }
 
   redo(){
@@ -49,12 +48,11 @@ class AppImageProvider extends ChangeNotifier {
       _index++;
     }
     _undoRedo();
-    notifyListeners();
+    notify();
   }
 
   _undoRedo(){
     canUndo = (_index != 0) ? true : false;
     canRedo = (_index < _images.length-1) ? true : false;
   }
-
 }

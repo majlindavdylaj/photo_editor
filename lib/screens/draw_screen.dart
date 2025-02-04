@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lindi/lindi.dart';
 import 'package:painter/painter.dart';
 import 'package:photo_editor/helper/app_color_picker.dart';
 import 'package:photo_editor/helper/pixel_color_image.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'package:screenshot/screenshot.dart';
 
 class DrawScreen extends StatefulWidget {
@@ -17,14 +17,14 @@ class DrawScreen extends StatefulWidget {
 
 class _DrawScreenState extends State<DrawScreen> {
 
-  late AppImageProvider imageProvider;
+  late ImageViewHolder imageViewHolder;
   Uint8List? currentImage;
   ScreenshotController screenshotController = ScreenshotController();
   final PainterController _controller = PainterController();
 
   @override
   void initState() {
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     _controller.thickness = 5.0;
     _controller.backgroundColor = Colors.transparent;
     super.initState();
@@ -40,7 +40,7 @@ class _DrawScreenState extends State<DrawScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageProvider.changeImage(bytes!);
+                imageViewHolder.changeImage(bytes!);
                 if(!mounted) return;
                 Navigator.of(context).pop();
               },
@@ -51,15 +51,16 @@ class _DrawScreenState extends State<DrawScreen> {
       body: Stack(
         children: [
           Center(
-            child: Consumer<AppImageProvider>(
-              builder: (BuildContext context, value, Widget? child) {
-                if (value.currentImage != null) {
-                  currentImage = value.currentImage;
+            child: LindiBuilder(
+              viewModel: imageViewHolder,
+              builder: (BuildContext context) {
+                if (imageViewHolder.currentImage != null) {
+                  currentImage = imageViewHolder.currentImage;
                   return Screenshot(
                     controller: screenshotController,
                     child: Stack(
                       children: [
-                        Image.memory(value.currentImage!),
+                        Image.memory(imageViewHolder.currentImage!),
                         Positioned.fill(
                           child: Painter(_controller)
                         )
@@ -112,7 +113,7 @@ class _DrawScreenState extends State<DrawScreen> {
       ),
       bottomNavigationBar: Container(
         width: double.infinity,
-        height: 60,
+        height: 100,
         color: Colors.black,
         child: SafeArea(
           child: Row(

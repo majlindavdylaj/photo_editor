@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:lindi/lindi.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'package:screenshot/screenshot.dart';
 
 class BlurScreen extends StatefulWidget {
@@ -15,7 +15,7 @@ class BlurScreen extends StatefulWidget {
 
 class _BlurScreenState extends State<BlurScreen> {
 
-  late AppImageProvider imageProvider;
+  late ImageViewHolder imageViewHolder;
   ScreenshotController screenshotController = ScreenshotController();
 
   double sigmaX = 0.1;
@@ -24,7 +24,7 @@ class _BlurScreenState extends State<BlurScreen> {
 
   @override
   void initState() {
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     super.initState();
   }
 
@@ -38,7 +38,7 @@ class _BlurScreenState extends State<BlurScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageProvider.changeImage(bytes!);
+                imageViewHolder.changeImage(bytes!);
                 if(!mounted) return;
                 Navigator.of(context).pop();
               },
@@ -49,9 +49,10 @@ class _BlurScreenState extends State<BlurScreen> {
       body: Stack(
         children: [
           Center(
-            child: Consumer<AppImageProvider>(
-              builder: (BuildContext context, value, Widget? child) {
-                if (value.currentImage != null) {
+            child: LindiBuilder(
+              viewModel: imageViewHolder,
+              builder: (BuildContext context) {
+                if (imageViewHolder.currentImage != null) {
                   return Screenshot(
                     controller: screenshotController,
                     child: ImageFiltered(
@@ -60,7 +61,7 @@ class _BlurScreenState extends State<BlurScreen> {
                         sigmaY: sigmaY,
                         tileMode: tileMode
                       ),
-                      child: Image.memory(value.currentImage!)
+                      child: Image.memory(imageViewHolder.currentImage!)
                     ),
                   );
                 }
@@ -123,7 +124,7 @@ class _BlurScreenState extends State<BlurScreen> {
       ),
       bottomNavigationBar: Container(
         width: double.infinity,
-        height: 60,
+        height: 100,
         color: Colors.black,
         child: SafeArea(
           child: SingleChildScrollView(

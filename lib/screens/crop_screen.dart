@@ -2,12 +2,11 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:lindi/lindi.dart';
 import 'package:photo_editor/cropImage/src/crop_controller.dart';
 import 'package:photo_editor/cropImage/src/crop_image.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'dart:ui' as ui;
-
-import 'package:provider/provider.dart';
 
 class CropScreen extends StatefulWidget {
   const CropScreen({Key? key}) : super(key: key);
@@ -22,11 +21,11 @@ class _CropScreenState extends State<CropScreen> {
     aspectRatio: 1,
     defaultCrop: const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
   );
-  late AppImageProvider imageProvider;
+  late ImageViewHolder imageViewHolder;
 
   @override
   void initState() {
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     super.initState();
   }
 
@@ -42,7 +41,7 @@ class _CropScreenState extends State<CropScreen> {
                 ui.Image bitmap = await controller.croppedBitmap();
                 ByteData? data = await bitmap.toByteData(format: ImageByteFormat.png);
                 Uint8List bytes = data!.buffer.asUint8List();
-                imageProvider.changeImage(bytes);
+                imageViewHolder.changeImage(bytes);
                 if(!mounted) return;
                 Navigator.of(context).pop();
               },
@@ -51,12 +50,13 @@ class _CropScreenState extends State<CropScreen> {
         ],
       ),
       body: Center(
-        child: Consumer<AppImageProvider>(
-          builder: (BuildContext context, value, Widget? child) {
-            if (value.currentImage != null) {
+        child: LindiBuilder(
+          viewModel: imageViewHolder,
+          builder: (BuildContext context) {
+            if (imageViewHolder.currentImage != null) {
               return CropImage(
                 controller: controller,
-                image: Image.memory(value.currentImage!),
+                image: Image.memory(imageViewHolder.currentImage!),
               );
             }
             return const Center(
@@ -67,7 +67,7 @@ class _CropScreenState extends State<CropScreen> {
       ),
       bottomNavigationBar: Container(
         width: double.infinity,
-        height: 60,
+        height: 100,
         color: Colors.black,
         child: SafeArea(
           child: SingleChildScrollView(

@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lindi/lindi.dart';
 import 'package:photo_editor/helper/shapes.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'package:photo_editor/widgets/gesture_detector_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:widget_mask/widget_mask.dart';
 
@@ -17,7 +17,7 @@ class MaskScreen extends StatefulWidget {
 
 class _MaskScreenState extends State<MaskScreen> {
 
-  late AppImageProvider imageProvider;
+  late ImageViewHolder imageViewHolder;
   Uint8List? currentImage;
   ScreenshotController screenshotController = ScreenshotController();
 
@@ -27,7 +27,7 @@ class _MaskScreenState extends State<MaskScreen> {
 
   @override
   void initState() {
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
     super.initState();
   }
 
@@ -41,7 +41,7 @@ class _MaskScreenState extends State<MaskScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageProvider.changeImage(bytes!);
+                imageViewHolder.changeImage(bytes!);
                 if(!mounted) return;
                 Navigator.of(context).pop();
               },
@@ -50,10 +50,11 @@ class _MaskScreenState extends State<MaskScreen> {
         ],
       ),
       body: Center(
-        child: Consumer<AppImageProvider>(
-          builder: (BuildContext context, value, Widget? child) {
-            if (value.currentImage != null) {
-              currentImage = value.currentImage;
+        child: LindiBuilder(
+          viewModel: imageViewHolder,
+          builder: (BuildContext context) {
+            if (imageViewHolder.currentImage != null) {
+              currentImage = imageViewHolder.currentImage;
               return Screenshot(
                   controller: screenshotController,
                   child: WidgetMask(
@@ -71,7 +72,7 @@ class _MaskScreenState extends State<MaskScreen> {
                         ],
                       ),
                     ),
-                    child: Image.memory(value.currentImage!),
+                    child: Image.memory(imageViewHolder.currentImage!),
                   )
               );
             }
@@ -83,7 +84,7 @@ class _MaskScreenState extends State<MaskScreen> {
       ),
       bottomNavigationBar: Container(
         width: double.infinity,
-        height: 110,
+        height: 140,
         color: Colors.black,
         child: SafeArea(
           child: Column(

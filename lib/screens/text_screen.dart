@@ -1,11 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lindi/lindi.dart';
 import 'package:lindi_sticker_widget/lindi_controller.dart';
+import 'package:lindi_sticker_widget/lindi_sticker_icon.dart';
 import 'package:lindi_sticker_widget/lindi_sticker_widget.dart';
 import 'package:photo_editor/helper/fonts.dart';
-import 'package:photo_editor/providers/app_image_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:photo_editor/lindi/image_viewholder.dart';
 import 'package:text_editor/text_editor.dart';
 
 class TextScreen extends StatefulWidget {
@@ -17,14 +18,59 @@ class TextScreen extends StatefulWidget {
 
 class _TextScreenState extends State<TextScreen> {
 
-  late AppImageProvider imageProvider;
-  LindiController controller = LindiController();
+  late ImageViewHolder imageViewHolder;
+  late LindiController controller;
   
   bool showEditor = true;
 
   @override
   void initState() {
-    imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    controller = LindiController(
+        icons: [
+          LindiStickerIcon(
+              icon: Icons.done,
+              alignment: Alignment.topRight,
+              onTap: () {
+                controller.selectedWidget!.done();
+              }),
+          LindiStickerIcon(
+              icon: Icons.lock_open,
+              lockedIcon: Icons.lock,
+              alignment: Alignment.topCenter,
+              type: IconType.lock,
+              onTap: () {
+                controller.selectedWidget!.lock();
+              }),
+          LindiStickerIcon(
+              icon: Icons.close,
+              alignment: Alignment.topLeft,
+              onTap: () {
+                controller.selectedWidget!.delete();
+              }),
+          LindiStickerIcon(
+              icon: Icons.layers,
+              alignment: Alignment.bottomCenter,
+              onTap: () {
+                controller.selectedWidget!.stack();
+              }),
+          LindiStickerIcon(
+              icon: Icons.flip,
+              alignment: Alignment.bottomLeft,
+              onTap: () {
+                controller.selectedWidget!.flip();
+              }),
+          LindiStickerIcon(
+              icon: Icons.crop_free,
+              alignment: Alignment.bottomRight,
+              type: IconType.resize
+          ),
+        ]
+    );
+    controller.onPositionChange((index) {
+      debugPrint(
+          "widgets size: ${controller.widgets.length}, current index: $index");
+    });
     super.initState();
   }
 
@@ -40,7 +86,7 @@ class _TextScreenState extends State<TextScreen> {
               IconButton(
                   onPressed: () async {
                     Uint8List? image = await controller.saveAsUint8List();
-                    imageProvider.changeImage(image!);
+                    imageViewHolder.changeImage(image!);
                     if(!mounted) return;
                     Navigator.of(context).pop();
                   },
@@ -49,12 +95,13 @@ class _TextScreenState extends State<TextScreen> {
             ],
           ),
           body: Center(
-            child: Consumer<AppImageProvider>(
-              builder: (BuildContext context, value, Widget? child) {
-                if (value.currentImage != null) {
+            child: LindiBuilder(
+              viewModel: imageViewHolder,
+              builder: (BuildContext context) {
+                if (imageViewHolder.currentImage != null) {
                   return LindiStickerWidget(
                       controller: controller,
-                      child: Image.memory(value.currentImage!)
+                      child: Image.memory(imageViewHolder.currentImage!)
                   );
                 }
                 return const Center(
@@ -65,7 +112,7 @@ class _TextScreenState extends State<TextScreen> {
           ),
           bottomNavigationBar: Container(
             width: double.infinity,
-            height: 50,
+            height: 80,
             color: Colors.black,
             child: Center(
               child: TextButton(
@@ -104,7 +151,7 @@ class _TextScreenState extends State<TextScreen> {
                   setState(() {
                     showEditor = false;
                     if(text.isNotEmpty){
-                      controller.addWidget(
+                      controller.add(
                           Text(text,
                             textAlign: align,
                             style: style,

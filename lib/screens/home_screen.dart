@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:lindi/lindi.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,33 +11,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     super.initState();
   }
 
   _savePhoto() async {
     final result = await ImageGallerySaver.saveImage(
-        imageViewHolder.currentImage!,
+        imageViewModel.currentImage!,
         quality: 100,
         name: "${DateTime.now().millisecondsSinceEpoch}");
-    if(!mounted) return false;
-    if(result['isSuccess']){
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Image saved to Gallery'),
-        )
-      );
+    if (!mounted) return false;
+    if (result['isSuccess']) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Image saved to Gallery'),
+      ));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong!'),
-          )
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Something went wrong!'),
+      ));
     }
   }
 
@@ -53,22 +48,21 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: (){
-              _savePhoto();
-            },
-            child: const Text('Save')
-          )
+              onPressed: () {
+                _savePhoto();
+              },
+              child: const Text('Save'))
         ],
       ),
       body: Stack(
         children: [
           Center(
             child: LindiBuilder(
-              viewModel: imageViewHolder,
-              builder: (BuildContext context){
-                if(imageViewHolder.currentImage != null){
+              viewModel: imageViewModel,
+              builder: (BuildContext context) {
+                if (imageViewModel.currentImage != null) {
                   return Image.memory(
-                    imageViewHolder.currentImage!,
+                    imageViewModel.currentImage!,
                   );
                 }
                 return const Center(
@@ -82,35 +76,34 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               margin: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.black
-              ),
+                  borderRadius: BorderRadius.circular(20), color: Colors.black),
               child: LindiBuilder(
-                viewModel: imageViewHolder,
-                builder: (context) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          imageViewHolder.undo();
-                        },
-                        icon: Icon(Icons.undo,
-                            color: imageViewHolder.canUndo ? Colors.white : Colors.white10
+                  viewModel: imageViewModel,
+                  builder: (context) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            imageViewModel.undo();
+                          },
+                          icon: Icon(Icons.undo,
+                              color: imageViewModel.canUndo
+                                  ? Colors.white
+                                  : Colors.white10),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          imageViewHolder.redo();
-                        },
-                        icon: Icon(Icons.redo,
-                            color: imageViewHolder.canRedo ? Colors.white : Colors.white10
+                        IconButton(
+                          onPressed: () {
+                            imageViewModel.redo();
+                          },
+                          icon: Icon(Icons.redo,
+                              color: imageViewModel.canRedo
+                                  ? Colors.white
+                                  : Colors.white10),
                         ),
-                      ),
-                    ],
-                  );
-                }
-              ),
+                      ],
+                    );
+                  }),
             ),
           )
         ],
@@ -124,56 +117,39 @@ class _HomeScreenState extends State<HomeScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _bottomBatItem(Icons.crop_rotate, 'Crop',
-                  onPress: () {
-                    Navigator.of(context).pushNamed('/crop');
-                  }
-                ),
+                _bottomBatItem(Icons.crop_rotate, 'Crop', onPress: () {
+                  Navigator.of(context).pushNamed('/crop');
+                }),
                 _bottomBatItem(Icons.filter_vintage_outlined, 'Filters',
-                  onPress: () {
-                    Navigator.of(context).pushNamed('/filter');
-                  }
-                ),
-                _bottomBatItem(Icons.tune, 'Adjust',
                     onPress: () {
-                      Navigator.of(context).pushNamed('/adjust');
-                    }
-                ),
-                _bottomBatItem(Icons.fit_screen_sharp, 'Fit',
-                    onPress: () {
-                      Navigator.of(context).pushNamed('/fit');
-                    }
-                ),
+                  Navigator.of(context).pushNamed('/filter');
+                }),
+                _bottomBatItem(Icons.tune, 'Adjust', onPress: () {
+                  Navigator.of(context).pushNamed('/adjust');
+                }),
+                _bottomBatItem(Icons.fit_screen_sharp, 'Fit', onPress: () {
+                  Navigator.of(context).pushNamed('/fit');
+                }),
                 _bottomBatItem(Icons.border_color_outlined, 'Tint',
                     onPress: () {
-                      Navigator.of(context).pushNamed('/tint');
-                    }
-                ),
-                _bottomBatItem(Icons.blur_circular, 'Blur',
-                    onPress: () {
-                      Navigator.of(context).pushNamed('/blur');
-                    }
-                ),
+                  Navigator.of(context).pushNamed('/tint');
+                }),
+                _bottomBatItem(Icons.blur_circular, 'Blur', onPress: () {
+                  Navigator.of(context).pushNamed('/blur');
+                }),
                 _bottomBatItem(Icons.emoji_emotions_outlined, 'Sticker',
                     onPress: () {
-                      Navigator.of(context).pushNamed('/sticker');
-                    }
-                ),
-                _bottomBatItem(Icons.text_fields, 'Text',
-                    onPress: () {
-                      Navigator.of(context).pushNamed('/text');
-                    }
-                ),
-                _bottomBatItem(Icons.draw, 'Draw',
-                    onPress: () {
-                      Navigator.of(context).pushNamed('/draw');
-                    }
-                ),
-                _bottomBatItem(Icons.star_border, 'Mask',
-                    onPress: () {
-                      Navigator.of(context).pushNamed('/mask');
-                    }
-                ),
+                  Navigator.of(context).pushNamed('/sticker');
+                }),
+                _bottomBatItem(Icons.text_fields, 'Text', onPress: () {
+                  Navigator.of(context).pushNamed('/text');
+                }),
+                _bottomBatItem(Icons.draw, 'Draw', onPress: () {
+                  Navigator.of(context).pushNamed('/draw');
+                }),
+                _bottomBatItem(Icons.star_border, 'Mask', onPress: () {
+                  Navigator.of(context).pushNamed('/mask');
+                }),
               ],
             ),
           ),
@@ -182,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _bottomBatItem(IconData icon, String title, {required onPress}){
+  Widget _bottomBatItem(IconData icon, String title, {required onPress}) {
     return InkWell(
       onTap: onPress,
       child: Padding(
@@ -192,15 +168,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(icon, color: Colors.white),
             const SizedBox(height: 3),
-            Text(title,
-              style: const TextStyle(
-                color: Colors.white70
-              ),
+            Text(
+              title,
+              style: const TextStyle(color: Colors.white70),
             )
           ],
         ),
       ),
     );
   }
-
 }

@@ -5,7 +5,7 @@ import 'package:lindi/lindi.dart';
 import 'package:painter/painter.dart';
 import 'package:photo_editor/helper/app_color_picker.dart';
 import 'package:photo_editor/helper/pixel_color_image.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:screenshot/screenshot.dart';
 
 class DrawScreen extends StatefulWidget {
@@ -16,15 +16,14 @@ class DrawScreen extends StatefulWidget {
 }
 
 class _DrawScreenState extends State<DrawScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   Uint8List? currentImage;
   ScreenshotController screenshotController = ScreenshotController();
   final PainterController _controller = PainterController();
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     _controller.thickness = 5.0;
     _controller.backgroundColor = Colors.transparent;
     super.initState();
@@ -40,33 +39,29 @@ class _DrawScreenState extends State<DrawScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageViewHolder.changeImage(bytes!);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Stack(
         children: [
           Center(
             child: LindiBuilder(
-              viewModel: imageViewHolder,
+              viewModel: imageViewModel,
               builder: (BuildContext context) {
-                if (imageViewHolder.currentImage != null) {
-                  currentImage = imageViewHolder.currentImage;
+                if (imageViewModel.currentImage != null) {
+                  currentImage = imageViewModel.currentImage;
                   return Screenshot(
-                    controller: screenshotController,
-                    child: Stack(
-                      children: [
-                        Image.memory(imageViewHolder.currentImage!),
-                        Positioned.fill(
-                          child: Painter(_controller)
-                        )
-                      ],
-                    )
-                  );
+                      controller: screenshotController,
+                      child: Stack(
+                        children: [
+                          Image.memory(imageViewModel.currentImage!),
+                          Positioned.fill(child: Painter(_controller))
+                        ],
+                      ));
                 }
                 return const Center(
                   child: CircularProgressIndicator(),
@@ -96,12 +91,11 @@ class _DrawScreenState extends State<DrawScreen> {
                       Expanded(
                         child: slider(
                             value: _controller.thickness,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 _controller.thickness = value;
                               });
-                            }
-                        ),
+                            }),
                       ),
                     ],
                   )
@@ -122,60 +116,44 @@ class _DrawScreenState extends State<DrawScreen> {
               Expanded(
                 child: RotatedBox(
                   quarterTurns: _controller.eraseMode ? 2 : 0,
-                  child: _bottomBarItem(Icons.create,
-                      onPress: () {
-                        setState(() {
-                          _controller.eraseMode = !_controller.eraseMode;
-                        });
-                      }
-                  ),
+                  child: _bottomBarItem(Icons.create, onPress: () {
+                    setState(() {
+                      _controller.eraseMode = !_controller.eraseMode;
+                    });
+                  }),
                 ),
               ),
               Expanded(
-                child: _bottomBarItem(Icons.color_lens_outlined,
-                    onPress: () {
-                      AppColorPicker().show(
-                          context,
-                          backgroundColor: _controller.drawColor,
-                          alpha: true,
-                          onPick: (color){
-                            setState(() {
-                              _controller.drawColor = color;
-                            });
-                          }
-                      );
-                    }
-                ),
+                child: _bottomBarItem(Icons.color_lens_outlined, onPress: () {
+                  AppColorPicker().show(context,
+                      backgroundColor: _controller.drawColor,
+                      alpha: true, onPick: (color) {
+                    setState(() {
+                      _controller.drawColor = color;
+                    });
+                  });
+                }),
               ),
               Expanded(
-                child: _bottomBarItem(Icons.colorize,
-                    onPress: () {
-                      PixelColorImage().show(
-                          context,
-                          backgroundColor: _controller.drawColor,
-                          image: currentImage,
-                          onPick: (color){
-                            setState(() {
-                              _controller.drawColor = color;
-                            });
-                          }
-                      );
-                    }
-                ),
+                child: _bottomBarItem(Icons.colorize, onPress: () {
+                  PixelColorImage().show(context,
+                      backgroundColor: _controller.drawColor,
+                      image: currentImage, onPick: (color) {
+                    setState(() {
+                      _controller.drawColor = color;
+                    });
+                  });
+                }),
               ),
               Expanded(
-                child: _bottomBarItem(Icons.undo,
-                    onPress: () {
-                      _controller.undo();
-                    }
-                ),
+                child: _bottomBarItem(Icons.undo, onPress: () {
+                  _controller.undo();
+                }),
               ),
               Expanded(
-                child: _bottomBarItem(Icons.delete,
-                    onPress: () {
-                      _controller.clear();
-                    }
-                ),
+                child: _bottomBarItem(Icons.delete, onPress: () {
+                  _controller.clear();
+                }),
               ),
             ],
           ),
@@ -205,8 +183,6 @@ class _DrawScreenState extends State<DrawScreen> {
         value: value,
         max: 20,
         min: 1,
-        onChanged: onChanged
-    );
+        onChanged: onChanged);
   }
-
 }

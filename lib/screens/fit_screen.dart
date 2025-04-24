@@ -9,7 +9,7 @@ import 'package:photo_editor/helper/app_color_picker.dart';
 import 'package:photo_editor/helper/app_image_picker.dart';
 import 'package:photo_editor/helper/pixel_color_image.dart';
 import 'package:photo_editor/helper/textures.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:screenshot/screenshot.dart';
 import '../model/texture.dart' as t;
 
@@ -21,8 +21,7 @@ class FitScreen extends StatefulWidget {
 }
 
 class _FitScreenState extends State<FitScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   ScreenshotController screenshotController = ScreenshotController();
 
   late t.Texture currentTexture;
@@ -50,11 +49,11 @@ class _FitScreenState extends State<FitScreen> {
   void initState() {
     textures = Textures().list();
     currentTexture = textures[0];
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     super.initState();
   }
 
-  showActiveWidget({r, b, c, t}){
+  showActiveWidget({r, b, c, t}) {
     showRatio = r != null ? true : false;
     showBlur = b != null ? true : false;
     showColor = c != null ? true : false;
@@ -62,7 +61,7 @@ class _FitScreenState extends State<FitScreen> {
     setState(() {});
   }
 
-  showBackgroundWidget({c, i, t}){
+  showBackgroundWidget({c, i, t}) {
     showColorBackground = c != null ? true : false;
     showImageBackground = i != null ? true : false;
     showTextureBackground = t != null ? true : false;
@@ -79,56 +78,48 @@ class _FitScreenState extends State<FitScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageViewHolder.changeImage(bytes!);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Center(
         child: LindiBuilder(
-          viewModel: imageViewHolder,
+          viewModel: imageViewModel,
           builder: (BuildContext context) {
-            if (imageViewHolder.currentImage != null) {
-              currentImage = imageViewHolder.currentImage;
-              backgroundImage ??= imageViewHolder.currentImage!;
+            if (imageViewModel.currentImage != null) {
+              currentImage = imageViewModel.currentImage;
+              backgroundImage ??= imageViewModel.currentImage!;
               return AspectRatio(
                 aspectRatio: x / y,
                 child: Screenshot(
-                  controller: screenshotController,
-                  child: Stack(
-                    children: [
-                      if(showColorBackground)
-                      Container(
-                        color: backgroundColor,
-                      ),
-                      if(showImageBackground)
-                      Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: MemoryImage(backgroundImage!)
-                          )
-                        ),
-                      ).blurred(
-                        colorOpacity: 0,
-                        blur: blur
-                      ),
-                      if(showTextureBackground)
-                      Container(
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: AssetImage(currentTexture.path!)
-                            )
-                        ),
-                      ),
-                      Center(child: Image.memory(imageViewHolder.currentImage!)),
-                    ],
-                  )
-                ),
+                    controller: screenshotController,
+                    child: Stack(
+                      children: [
+                        if (showColorBackground)
+                          Container(
+                            color: backgroundColor,
+                          ),
+                        if (showImageBackground)
+                          Container(
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: MemoryImage(backgroundImage!))),
+                          ).blurred(colorOpacity: 0, blur: blur),
+                        if (showTextureBackground)
+                          Container(
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: AssetImage(currentTexture.path!))),
+                          ),
+                        Center(
+                            child: Image.memory(imageViewModel.currentImage!)),
+                      ],
+                    )),
               );
             }
             return const Center(
@@ -146,55 +137,42 @@ class _FitScreenState extends State<FitScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
-                child: Stack(
-                  children: [
-                    if(showRatio)
-                    ratioWidget(),
-                    if(showBlur)
-                      blurWidget(),
-                    if(showColor)
-                      colorWidget(),
-                    if(showRTexture)
-                      textureWidget(),
-                  ],
-                )
-              ),
+                  child: Stack(
+                children: [
+                  if (showRatio) ratioWidget(),
+                  if (showBlur) blurWidget(),
+                  if (showColor) colorWidget(),
+                  if (showRTexture) textureWidget(),
+                ],
+              )),
               Row(
                 children: [
                   Expanded(
                     child: _bottomBatItem(Icons.aspect_ratio, 'Ratio',
-                        color: showRatio ? Colors.blue : null,
-                        onPress: () {
-                          showActiveWidget(r: true);
-                        }
-                    ),
+                        color: showRatio ? Colors.blue : null, onPress: () {
+                      showActiveWidget(r: true);
+                    }),
                   ),
                   Expanded(
                     child: _bottomBatItem(Icons.blur_linear, 'Blur',
-                        color: showBlur ? Colors.blue : null,
-                        onPress: () {
-                          showBackgroundWidget(i: true);
-                          showActiveWidget(b: true);
-                        }
-                    ),
+                        color: showBlur ? Colors.blue : null, onPress: () {
+                      showBackgroundWidget(i: true);
+                      showActiveWidget(b: true);
+                    }),
                   ),
                   Expanded(
                     child: _bottomBatItem(Icons.color_lens_outlined, 'Color',
-                        color: showColor ? Colors.blue : null,
-                        onPress: () {
-                          showBackgroundWidget(c: true);
-                          showActiveWidget(c: true);
-                        }
-                    ),
+                        color: showColor ? Colors.blue : null, onPress: () {
+                      showBackgroundWidget(c: true);
+                      showActiveWidget(c: true);
+                    }),
                   ),
                   Expanded(
                     child: _bottomBatItem(Icons.texture, 'Texture',
-                        color: showRTexture ? Colors.blue : null,
-                        onPress: () {
-                          showBackgroundWidget(t: true);
-                          showActiveWidget(t: true);
-                        }
-                    ),
+                        color: showRTexture ? Colors.blue : null, onPress: () {
+                      showBackgroundWidget(t: true);
+                      showActiveWidget(t: true);
+                    }),
                   ),
                 ],
               ),
@@ -205,7 +183,8 @@ class _FitScreenState extends State<FitScreen> {
     );
   }
 
-  Widget _bottomBatItem(IconData icon, String title, {Color? color, required onPress}){
+  Widget _bottomBatItem(IconData icon, String title,
+      {Color? color, required onPress}) {
     return InkWell(
       onTap: onPress,
       child: Padding(
@@ -215,10 +194,9 @@ class _FitScreenState extends State<FitScreen> {
           children: [
             Icon(icon, color: color ?? Colors.white),
             const SizedBox(height: 3),
-            Text(title,
-              style: TextStyle(
-                  color: color ?? Colors.white70
-              ),
+            Text(
+              title,
+              style: TextStyle(color: color ?? Colors.white70),
             )
           ],
         ),
@@ -226,7 +204,7 @@ class _FitScreenState extends State<FitScreen> {
     );
   }
 
-  Widget ratioWidget(){
+  Widget ratioWidget() {
     return Container(
       color: Colors.black,
       child: SingleChildScrollView(
@@ -234,93 +212,84 @@ class _FitScreenState extends State<FitScreen> {
         child: Row(
           children: [
             TextButton(
-                onPressed: (){
-                  setState(() {
-                    x = 1;
-                    y = 1;
-                  });
-                },
-                child: const Text('1:1'),
+              onPressed: () {
+                setState(() {
+                  x = 1;
+                  y = 1;
+                });
+              },
+              child: const Text('1:1'),
             ),
             TextButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     x = 2;
                     y = 1;
                   });
                 },
-                child: const Text('2:1')
-            ),
+                child: const Text('2:1')),
             TextButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     x = 1;
                     y = 2;
                   });
                 },
-                child: const Text('1:2')
-            ),
+                child: const Text('1:2')),
             TextButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     x = 4;
                     y = 3;
                   });
                 },
-                child: const Text('4:3')
-            ),
+                child: const Text('4:3')),
             TextButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     x = 3;
                     y = 4;
                   });
                 },
-                child: const Text('3:4')
-            ),
+                child: const Text('3:4')),
             TextButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     x = 16;
                     y = 9;
                   });
                 },
-                child: const Text('16:9')
-            ),
+                child: const Text('16:9')),
             TextButton(
-                onPressed: (){
+                onPressed: () {
                   setState(() {
                     x = 9;
                     y = 16;
                   });
                 },
-                child: const Text('9:16')
-            ),
-
+                child: const Text('9:16')),
           ],
         ),
       ),
     );
   }
 
-  Widget blurWidget(){
+  Widget blurWidget() {
     return Container(
       color: Colors.black,
       child: Center(
         child: Row(
           children: [
             IconButton(
-              onPressed: (){
-                AppImagePicker(source: ImageSource.gallery)
-                    .pick(onPick: (File? image) async {
+              onPressed: () {
+                AppImagePicker(source: ImageSource.gallery).pick(
+                    onPick: (File? image) async {
                   backgroundImage = await image!.readAsBytes();
                   setState(() {});
                 });
               },
-              icon: const Icon(
-                Icons.photo_library_outlined,
-                color: Colors.blue
-              ),
+              icon:
+                  const Icon(Icons.photo_library_outlined, color: Colors.blue),
             ),
             Expanded(
               child: Slider(
@@ -328,12 +297,11 @@ class _FitScreenState extends State<FitScreen> {
                   value: blur,
                   max: 100,
                   min: 0,
-                  onChanged: (value){
+                  onChanged: (value) {
                     setState(() {
                       blur = value;
                     });
-                  }
-              ),
+                  }),
             )
           ],
         ),
@@ -341,7 +309,7 @@ class _FitScreenState extends State<FitScreen> {
     );
   }
 
-  Widget colorWidget(){
+  Widget colorWidget() {
     return Container(
       color: Colors.black,
       child: Center(
@@ -349,39 +317,27 @@ class _FitScreenState extends State<FitScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-              onPressed: (){
-                AppColorPicker().show(
-                  context,
-                  backgroundColor: backgroundColor,
-                  onPick: (color){
-                    setState(() {
-                      backgroundColor = color;
-                    });
-                  }
-                );
+              onPressed: () {
+                AppColorPicker().show(context, backgroundColor: backgroundColor,
+                    onPick: (color) {
+                  setState(() {
+                    backgroundColor = color;
+                  });
+                });
               },
-              icon: const Icon(
-                  Icons.color_lens_outlined,
-                  color: Colors.blue
-              ),
+              icon: const Icon(Icons.color_lens_outlined, color: Colors.blue),
             ),
             IconButton(
-              onPressed: (){
-                PixelColorImage().show(
-                  context,
-                  backgroundColor: backgroundColor,
-                  image: currentImage,
-                  onPick: (color){
-                    setState(() {
-                      backgroundColor = color;
-                    });
-                  }
-                );
+              onPressed: () {
+                PixelColorImage().show(context,
+                    backgroundColor: backgroundColor,
+                    image: currentImage, onPick: (color) {
+                  setState(() {
+                    backgroundColor = color;
+                  });
+                });
               },
-              icon: const Icon(
-                  Icons.colorize,
-                  color: Colors.blue
-              ),
+              icon: const Icon(Icons.colorize, color: Colors.blue),
             ),
           ],
         ),
@@ -389,14 +345,14 @@ class _FitScreenState extends State<FitScreen> {
     );
   }
 
-  Widget textureWidget(){
+  Widget textureWidget() {
     return Container(
       color: Colors.black,
       child: Center(
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: textures.length,
-          itemBuilder: (BuildContext context, int index){
+          itemBuilder: (BuildContext context, int index) {
             t.Texture texture = textures[index];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -409,7 +365,7 @@ class _FitScreenState extends State<FitScreen> {
                     child: FittedBox(
                       fit: BoxFit.fill,
                       child: InkWell(
-                        onTap: (){
+                        onTap: () {
                           setState(() {
                             currentTexture = texture;
                           });
@@ -426,5 +382,4 @@ class _FitScreenState extends State<FitScreen> {
       ),
     );
   }
-
 }

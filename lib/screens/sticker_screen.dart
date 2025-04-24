@@ -6,7 +6,7 @@ import 'package:lindi_sticker_widget/lindi_controller.dart';
 import 'package:lindi_sticker_widget/lindi_sticker_icon.dart';
 import 'package:lindi_sticker_widget/lindi_sticker_widget.dart';
 import 'package:photo_editor/helper/stickers.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 
 class StickerScreen extends StatefulWidget {
   const StickerScreen({Key? key}) : super(key: key);
@@ -16,56 +16,52 @@ class StickerScreen extends StatefulWidget {
 }
 
 class _StickerScreenState extends State<StickerScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   late LindiController controller;
 
   int index = 0;
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
-    controller = LindiController(
-        icons: [
-          LindiStickerIcon(
-              icon: Icons.done,
-              alignment: Alignment.topRight,
-              onTap: () {
-                controller.selectedWidget!.done();
-              }),
-          LindiStickerIcon(
-              icon: Icons.lock_open,
-              lockedIcon: Icons.lock,
-              alignment: Alignment.topCenter,
-              type: IconType.lock,
-              onTap: () {
-                controller.selectedWidget!.lock();
-              }),
-          LindiStickerIcon(
-              icon: Icons.close,
-              alignment: Alignment.topLeft,
-              onTap: () {
-                controller.selectedWidget!.delete();
-              }),
-          LindiStickerIcon(
-              icon: Icons.layers,
-              alignment: Alignment.bottomCenter,
-              onTap: () {
-                controller.selectedWidget!.stack();
-              }),
-          LindiStickerIcon(
-              icon: Icons.flip,
-              alignment: Alignment.bottomLeft,
-              onTap: () {
-                controller.selectedWidget!.flip();
-              }),
-          LindiStickerIcon(
-              icon: Icons.crop_free,
-              alignment: Alignment.bottomRight,
-              type: IconType.resize
-          ),
-        ]
-    );
+    imageViewModel = LindiInjector.get<ImageViewModel>();
+    controller = LindiController(icons: [
+      LindiStickerIcon(
+          icon: Icons.done,
+          alignment: Alignment.topRight,
+          onTap: () {
+            controller.selectedWidget!.done();
+          }),
+      LindiStickerIcon(
+          icon: Icons.lock_open,
+          lockedIcon: Icons.lock,
+          alignment: Alignment.topCenter,
+          type: IconType.lock,
+          onTap: () {
+            controller.selectedWidget!.lock();
+          }),
+      LindiStickerIcon(
+          icon: Icons.close,
+          alignment: Alignment.topLeft,
+          onTap: () {
+            controller.selectedWidget!.delete();
+          }),
+      LindiStickerIcon(
+          icon: Icons.layers,
+          alignment: Alignment.bottomCenter,
+          onTap: () {
+            controller.selectedWidget!.stack();
+          }),
+      LindiStickerIcon(
+          icon: Icons.flip,
+          alignment: Alignment.bottomLeft,
+          onTap: () {
+            controller.selectedWidget!.flip();
+          }),
+      LindiStickerIcon(
+          icon: Icons.crop_free,
+          alignment: Alignment.bottomRight,
+          type: IconType.resize),
+    ]);
     controller.onPositionChange((index) {
       debugPrint(
           "widgets size: ${controller.widgets.length}, current index: $index");
@@ -83,25 +79,23 @@ class _StickerScreenState extends State<StickerScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? image = await controller.saveAsUint8List();
-                imageViewHolder.changeImage(image!);
-                if(!mounted) return;
+                imageViewModel.changeImage(image!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Center(
         child: LindiBuilder(
-          viewModel: imageViewHolder,
+          viewModel: imageViewModel,
           builder: (BuildContext context) {
-            if (imageViewHolder.currentImage != null) {
+            if (imageViewModel.currentImage != null) {
               return Container(
                 color: Colors.red,
                 child: LindiStickerWidget(
-                  controller: controller,
-                  child: Image.memory(imageViewHolder.currentImage!)
-                ),
+                    controller: controller,
+                    child: Image.memory(imageViewModel.currentImage!)),
               );
             }
             return const Center(
@@ -119,52 +113,47 @@ class _StickerScreenState extends State<StickerScreen> {
             children: [
               Expanded(
                 child: Container(
-                  color: Colors.black,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: Stickers().list()[index].length,
-                    itemBuilder: (BuildContext context, int idx){
-                      String sticker = Stickers().list()[index][idx];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 60,
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: InkWell(
-                                  onTap: (){
-                                    controller.add(
-                                        Image.asset(sticker, width: 100)
-                                    );
-                                  },
-                                  child: Image.asset(sticker),
+                    color: Colors.black,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: Stickers().list()[index].length,
+                      itemBuilder: (BuildContext context, int idx) {
+                        String sticker = Stickers().list()[index][idx];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: InkWell(
+                                    onTap: () {
+                                      controller.add(
+                                          Image.asset(sticker, width: 100));
+                                    },
+                                    child: Image.asset(sticker),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  )
-                ),
+                            ],
+                          ),
+                        );
+                      },
+                    )),
               ),
               SingleChildScrollView(
                 child: Row(
                   children: [
-                    for(int i = 0; i < Stickers().list().length; i++)
-                    _bottomBatItem(
-                      i,
-                      Stickers().list()[i][0],
-                      onPress: () {
+                    for (int i = 0; i < Stickers().list().length; i++)
+                      _bottomBatItem(i, Stickers().list()[i][0], onPress: () {
                         setState(() {
                           index = i;
                         });
-                      }
-                    )
+                      })
                   ],
                 ),
               )
@@ -175,7 +164,8 @@ class _StickerScreenState extends State<StickerScreen> {
     );
   }
 
-  Widget _bottomBatItem(int idx, String icon, {Color? color, required onPress}){
+  Widget _bottomBatItem(int idx, String icon,
+      {Color? color, required onPress}) {
     return InkWell(
       onTap: onPress,
       child: Padding(
@@ -200,5 +190,4 @@ class _StickerScreenState extends State<StickerScreen> {
       ),
     );
   }
-
 }

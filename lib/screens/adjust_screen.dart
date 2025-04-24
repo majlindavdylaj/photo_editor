@@ -4,7 +4,7 @@ import 'package:colorfilter_generator/addons.dart';
 import 'package:colorfilter_generator/colorfilter_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:lindi/lindi.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:screenshot/screenshot.dart';
 
 class AdjustScreen extends StatefulWidget {
@@ -15,7 +15,6 @@ class AdjustScreen extends StatefulWidget {
 }
 
 class _AdjustScreenState extends State<AdjustScreen> {
-
   double brightness = 0;
   double contrast = 0;
   double saturation = 0;
@@ -30,30 +29,27 @@ class _AdjustScreenState extends State<AdjustScreen> {
 
   late ColorFilterGenerator adj;
 
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     adjust();
     super.initState();
   }
 
-  adjust({b, c, s, h, se}){
-    adj = ColorFilterGenerator(
-      name: 'Adjust',
-      filters: [
-        ColorFilterAddons.brightness(b ?? brightness),
-        ColorFilterAddons.contrast(c ?? contrast),
-        ColorFilterAddons.saturation(s ?? saturation),
-        ColorFilterAddons.hue(h ?? hue),
-        ColorFilterAddons.sepia(se ?? sepia),
-      ]
-    );
+  adjust({b, c, s, h, se}) {
+    adj = ColorFilterGenerator(name: 'Adjust', filters: [
+      ColorFilterAddons.brightness(b ?? brightness),
+      ColorFilterAddons.contrast(c ?? contrast),
+      ColorFilterAddons.saturation(s ?? saturation),
+      ColorFilterAddons.hue(h ?? hue),
+      ColorFilterAddons.sepia(se ?? sepia),
+    ]);
   }
 
-  showSlider({b, c, s, h, se}){
+  showSlider({b, c, s, h, se}) {
     setState(() {
       showBrightness = b != null ? true : false;
       showContrast = c != null ? true : false;
@@ -73,27 +69,25 @@ class _AdjustScreenState extends State<AdjustScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageViewHolder.changeImage(bytes!);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Stack(
         children: [
           Center(
             child: LindiBuilder(
-              viewModel: imageViewHolder,
+              viewModel: imageViewModel,
               builder: (BuildContext context) {
-                if (imageViewHolder.currentImage != null) {
+                if (imageViewModel.currentImage != null) {
                   return Screenshot(
                     controller: screenshotController,
                     child: ColorFiltered(
-                      colorFilter: ColorFilter.matrix(adj.matrix),
-                      child: Image.memory(imageViewHolder.currentImage!)
-                    ),
+                        colorFilter: ColorFilter.matrix(adj.matrix),
+                        child: Image.memory(imageViewModel.currentImage!)),
                   );
                 }
                 return const Center(
@@ -113,71 +107,65 @@ class _AdjustScreenState extends State<AdjustScreen> {
                       Visibility(
                         visible: showBrightness,
                         child: slider(
-                          value: brightness,
-                          onChanged: (value){
-                            setState(() {
-                              brightness = value;
-                              adjust(b: brightness);
-                            });
-                          }
-                        ),
+                            value: brightness,
+                            onChanged: (value) {
+                              setState(() {
+                                brightness = value;
+                                adjust(b: brightness);
+                              });
+                            }),
                       ),
                       Visibility(
                         visible: showContrast,
                         child: slider(
                             value: contrast,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 contrast = value;
                                 adjust(c: contrast);
                               });
-                            }
-                        ),
+                            }),
                       ),
                       Visibility(
                         visible: showSaturation,
                         child: slider(
                             value: saturation,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 saturation = value;
                                 adjust(s: saturation);
                               });
-                            }
-                        ),
+                            }),
                       ),
                       Visibility(
                         visible: showHue,
                         child: slider(
                             value: hue,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 hue = value;
                                 adjust(h: hue);
                               });
-                            }
-                        ),
+                            }),
                       ),
                       Visibility(
                         visible: showSepia,
                         child: slider(
                             value: sepia,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 sepia = value;
                                 adjust(se: sepia);
                               });
-                            }
-                        ),
+                            }),
                       )
                     ],
                   ),
                 ),
                 TextButton(
-                  child: const Text('RESET',
-                    style: TextStyle(
-                      color: Colors.white
-                    ),
+                  child: const Text(
+                    'RESET',
+                    style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
                     setState(() {
@@ -187,12 +175,11 @@ class _AdjustScreenState extends State<AdjustScreen> {
                       hue = 0;
                       sepia = 0;
                       adjust(
-                        b: brightness,
-                        c: contrast,
-                        s: saturation,
-                        h: hue,
-                        se: sepia
-                      );
+                          b: brightness,
+                          c: contrast,
+                          s: saturation,
+                          h: hue,
+                          se: sepia);
                     });
                   },
                 ),
@@ -211,35 +198,25 @@ class _AdjustScreenState extends State<AdjustScreen> {
             child: Row(
               children: [
                 _bottomBatItem(Icons.brightness_4_rounded, 'Brightness',
-                  color: showBrightness ? Colors.blue : null,
-                  onPress: () {
-                    showSlider(b: true);
-                  }
-                ),
+                    color: showBrightness ? Colors.blue : null, onPress: () {
+                  showSlider(b: true);
+                }),
                 _bottomBatItem(Icons.contrast, 'Contrast',
-                  color: showContrast ? Colors.blue : null,
-                  onPress: () {
-                    showSlider(c: true);
-                  }
-                ),
+                    color: showContrast ? Colors.blue : null, onPress: () {
+                  showSlider(c: true);
+                }),
                 _bottomBatItem(Icons.water_drop, 'Saturation',
-                  color: showSaturation ? Colors.blue : null,
-                  onPress: () {
-                    showSlider(s: true);
-                  }
-                ),
+                    color: showSaturation ? Colors.blue : null, onPress: () {
+                  showSlider(s: true);
+                }),
                 _bottomBatItem(Icons.filter_tilt_shift, 'Hue',
-                  color: showHue ? Colors.blue : null,
-                  onPress: () {
-                    showSlider(h: true);
-                  }
-                ),
+                    color: showHue ? Colors.blue : null, onPress: () {
+                  showSlider(h: true);
+                }),
                 _bottomBatItem(Icons.motion_photos_on, 'Sepia',
-                  color: showSepia ? Colors.blue : null,
-                  onPress: () {
-                    showSlider(se: true);
-                  }
-                ),
+                    color: showSepia ? Colors.blue : null, onPress: () {
+                  showSlider(se: true);
+                }),
               ],
             ),
           ),
@@ -248,7 +225,8 @@ class _AdjustScreenState extends State<AdjustScreen> {
     );
   }
 
-  Widget _bottomBatItem(IconData icon, String title, {Color? color, required onPress}) {
+  Widget _bottomBatItem(IconData icon, String title,
+      {Color? color, required onPress}) {
     return InkWell(
       onTap: onPress,
       child: Padding(
@@ -258,10 +236,9 @@ class _AdjustScreenState extends State<AdjustScreen> {
           children: [
             Icon(icon, color: color ?? Colors.white),
             const SizedBox(height: 3),
-            Text(title,
-              style: TextStyle(
-                  color: color ?? Colors.white70
-              ),
+            Text(
+              title,
+              style: TextStyle(color: color ?? Colors.white70),
             )
           ],
         ),
@@ -271,12 +248,10 @@ class _AdjustScreenState extends State<AdjustScreen> {
 
   Widget slider({value, onChanged}) {
     return Slider(
-      label: '${value.toStringAsFixed(2)}',
-      value: value,
-      max: 1,
-      min: -0.9,
-      onChanged: onChanged
-    );
+        label: '${value.toStringAsFixed(2)}',
+        value: value,
+        max: 1,
+        min: -0.9,
+        onChanged: onChanged);
   }
-
 }

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lindi/lindi.dart';
 import 'package:photo_editor/cropImage/src/crop_controller.dart';
 import 'package:photo_editor/cropImage/src/crop_image.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'dart:ui' as ui;
 
 class CropScreen extends StatefulWidget {
@@ -16,16 +16,15 @@ class CropScreen extends StatefulWidget {
 }
 
 class _CropScreenState extends State<CropScreen> {
-
   final controller = CropController(
     aspectRatio: 1,
     defaultCrop: const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
   );
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     super.initState();
   }
 
@@ -39,24 +38,24 @@ class _CropScreenState extends State<CropScreen> {
           IconButton(
               onPressed: () async {
                 ui.Image bitmap = await controller.croppedBitmap();
-                ByteData? data = await bitmap.toByteData(format: ImageByteFormat.png);
+                ByteData? data =
+                    await bitmap.toByteData(format: ImageByteFormat.png);
                 Uint8List bytes = data!.buffer.asUint8List();
-                imageViewHolder.changeImage(bytes);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Center(
         child: LindiBuilder(
-          viewModel: imageViewHolder,
+          viewModel: imageViewModel,
           builder: (BuildContext context) {
-            if (imageViewHolder.currentImage != null) {
+            if (imageViewModel.currentImage != null) {
               return CropImage(
                 controller: controller,
-                image: Image.memory(imageViewHolder.currentImage!),
+                image: Image.memory(imageViewModel.currentImage!),
               );
             }
             return const Center(
@@ -79,15 +78,13 @@ class _CropScreenState extends State<CropScreen> {
                         color: Colors.white),
                     onPress: () {
                       controller.rotateLeft();
-                    }
-                ),
+                    }),
                 _bottomBatItem(
                     child: const Icon(Icons.rotate_90_degrees_cw_outlined,
                         color: Colors.white),
                     onPress: () {
                       controller.rotateRight();
-                    }
-                ),
+                    }),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Container(
@@ -97,93 +94,77 @@ class _CropScreenState extends State<CropScreen> {
                   ),
                 ),
                 _bottomBatItem(
-                    child: const Text('Free',
-                      style: TextStyle(
-                        color: Colors.white
-                      ),
+                    child: const Text(
+                      'Free',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = null;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('1:1',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '1:1',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 1;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('2:1',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '2:1',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 2;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('1:2',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '1:2',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 1 / 2;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('4:3',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '4:3',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 4 / 3;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('3:4',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '3:4',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 3 / 4;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('16:9',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '16:9',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 16 / 9;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                ),
+                    }),
                 _bottomBatItem(
-                    child: const Text('9:16',
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                    child: const Text(
+                      '9:16',
+                      style: TextStyle(color: Colors.white),
                     ),
                     onPress: () {
                       controller.aspectRatio = 9 / 16;
                       controller.crop = const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9);
-                    }
-                )
+                    })
               ],
             ),
           ),
@@ -199,8 +180,7 @@ class _CropScreenState extends State<CropScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Center(
             child: child,
-          )
-      ),
+          )),
     );
   }
 }

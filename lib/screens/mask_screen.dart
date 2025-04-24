@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:lindi/lindi.dart';
 import 'package:photo_editor/helper/shapes.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:photo_editor/widgets/gesture_detector_widget.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:widget_mask/widget_mask.dart';
@@ -16,8 +16,7 @@ class MaskScreen extends StatefulWidget {
 }
 
 class _MaskScreenState extends State<MaskScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   Uint8List? currentImage;
   ScreenshotController screenshotController = ScreenshotController();
 
@@ -27,7 +26,7 @@ class _MaskScreenState extends State<MaskScreen> {
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     super.initState();
   }
 
@@ -41,20 +40,19 @@ class _MaskScreenState extends State<MaskScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageViewHolder.changeImage(bytes!);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Center(
         child: LindiBuilder(
-          viewModel: imageViewHolder,
+          viewModel: imageViewModel,
           builder: (BuildContext context) {
-            if (imageViewHolder.currentImage != null) {
-              currentImage = imageViewHolder.currentImage;
+            if (imageViewModel.currentImage != null) {
+              currentImage = imageViewModel.currentImage;
               return Screenshot(
                   controller: screenshotController,
                   child: WidgetMask(
@@ -67,14 +65,14 @@ class _MaskScreenState extends State<MaskScreen> {
                             color: Colors.white.withOpacity(0.4),
                           ),
                           GestureDetectorWidget(
-                              child: Icon(iconData, color: Colors.white.withOpacity(opacity), size: 250)
-                          )
+                              child: Icon(iconData,
+                                  color: Colors.white.withOpacity(opacity),
+                                  size: 250))
                         ],
                       ),
                     ),
-                    child: Image.memory(imageViewHolder.currentImage!),
-                  )
-              );
+                    child: Image.memory(imageViewModel.currentImage!),
+                  ));
             }
             return const Center(
               child: CircularProgressIndicator(),
@@ -94,67 +92,49 @@ class _MaskScreenState extends State<MaskScreen> {
                 child: Row(
                   children: [
                     TextButton(
-                      onPressed: (){
-                        setState(() {
-                          opacity = 1;
-                          blendMode = BlendMode.dstIn;
-                        });
-                      },
-                      child: const Text('Dstin',
-                        style: TextStyle(
-                          color: Colors.white
-                        ),
-                      )
-                    ),
+                        onPressed: () {
+                          setState(() {
+                            opacity = 1;
+                            blendMode = BlendMode.dstIn;
+                          });
+                        },
+                        child: const Text(
+                          'Dstin',
+                          style: TextStyle(color: Colors.white),
+                        )),
                     TextButton(
-                        onPressed: (){
+                        onPressed: () {
                           setState(() {
                             blendMode = BlendMode.overlay;
                           });
                         },
                         child: const Text('Overlay',
-                            style: TextStyle(
-                                color: Colors.white
-                            )
-                        )
-                    ),
+                            style: TextStyle(color: Colors.white))),
                     TextButton(
-                        onPressed: (){
+                        onPressed: () {
                           setState(() {
                             opacity = 0.7;
                             blendMode = BlendMode.screen;
                           });
                         },
                         child: const Text('Screen',
-                            style: TextStyle(
-                                color: Colors.white
-                            )
-                        )
-                    ),
+                            style: TextStyle(color: Colors.white))),
                     TextButton(
-                        onPressed: (){
+                        onPressed: () {
                           setState(() {
                             blendMode = BlendMode.saturation;
                           });
                         },
                         child: const Text('Saturation',
-                            style: TextStyle(
-                                color: Colors.white
-                            )
-                        )
-                    ),
+                            style: TextStyle(color: Colors.white))),
                     TextButton(
-                        onPressed: (){
+                        onPressed: () {
                           setState(() {
                             blendMode = BlendMode.difference;
                           });
                         },
                         child: const Text('Difference',
-                            style: TextStyle(
-                                color: Colors.white
-                            )
-                        )
-                    )
+                            style: TextStyle(color: Colors.white)))
                   ],
                 ),
               ),
@@ -164,15 +144,12 @@ class _MaskScreenState extends State<MaskScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      for(int i = 0; i < Shapes().list().length; i++)
-                        _bottomBatItem(
-                            Shapes().list()[i],
-                            onPress: () {
-                              setState(() {
-                                iconData = Shapes().list()[i];
-                              });
-                            }
-                        )
+                      for (int i = 0; i < Shapes().list().length; i++)
+                        _bottomBatItem(Shapes().list()[i], onPress: () {
+                          setState(() {
+                            iconData = Shapes().list()[i];
+                          });
+                        })
                     ],
                   ),
                 ),
@@ -184,7 +161,7 @@ class _MaskScreenState extends State<MaskScreen> {
     );
   }
 
-  Widget _bottomBatItem(IconData icon, {required onPress}){
+  Widget _bottomBatItem(IconData icon, {required onPress}) {
     return InkWell(
       onTap: onPress,
       child: Padding(
@@ -201,5 +178,4 @@ class _MaskScreenState extends State<MaskScreen> {
       ),
     );
   }
-
 }

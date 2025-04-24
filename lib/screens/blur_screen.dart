@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:lindi/lindi.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:screenshot/screenshot.dart';
 
 class BlurScreen extends StatefulWidget {
@@ -14,8 +14,7 @@ class BlurScreen extends StatefulWidget {
 }
 
 class _BlurScreenState extends State<BlurScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   ScreenshotController screenshotController = ScreenshotController();
 
   double sigmaX = 0.1;
@@ -24,7 +23,7 @@ class _BlurScreenState extends State<BlurScreen> {
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     super.initState();
   }
 
@@ -38,31 +37,26 @@ class _BlurScreenState extends State<BlurScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageViewHolder.changeImage(bytes!);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Stack(
         children: [
           Center(
             child: LindiBuilder(
-              viewModel: imageViewHolder,
+              viewModel: imageViewModel,
               builder: (BuildContext context) {
-                if (imageViewHolder.currentImage != null) {
+                if (imageViewModel.currentImage != null) {
                   return Screenshot(
                     controller: screenshotController,
                     child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(
-                        sigmaX: sigmaX,
-                        sigmaY: sigmaY,
-                        tileMode: tileMode
-                      ),
-                      child: Image.memory(imageViewHolder.currentImage!)
-                    ),
+                        imageFilter: ImageFilter.blur(
+                            sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode),
+                        child: Image.memory(imageViewModel.currentImage!)),
                   );
                 }
                 return const Center(
@@ -80,39 +74,35 @@ class _BlurScreenState extends State<BlurScreen> {
                 children: [
                   Row(
                     children: [
-                      const Text('X:',
-                        style: TextStyle(
-                          color: Colors.white
-                        ),
+                      const Text(
+                        'X:',
+                        style: TextStyle(color: Colors.white),
                       ),
                       Expanded(
                         child: slider(
                             value: sigmaX,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 sigmaX = value;
                               });
-                            }
-                        ),
+                            }),
                       ),
                     ],
                   ),
                   Row(
                     children: [
-                      const Text('Y:',
-                        style: TextStyle(
-                            color: Colors.white
-                        ),
+                      const Text(
+                        'Y:',
+                        style: TextStyle(color: Colors.white),
                       ),
                       Expanded(
                         child: slider(
                             value: sigmaY,
-                            onChanged: (value){
+                            onChanged: (value) {
                               setState(() {
                                 sigmaY = value;
                               });
-                            }
-                        ),
+                            }),
                       ),
                     ],
                   ),
@@ -134,35 +124,31 @@ class _BlurScreenState extends State<BlurScreen> {
                 _bottomBarItem('Decal',
                     color: tileMode == TileMode.decal ? Colors.blue : null,
                     onPress: () {
-                      setState(() {
-                        tileMode = TileMode.decal;
-                      });
-                    }
-                ),
+                  setState(() {
+                    tileMode = TileMode.decal;
+                  });
+                }),
                 _bottomBarItem('Clamp',
                     color: tileMode == TileMode.clamp ? Colors.blue : null,
                     onPress: () {
-                      setState(() {
-                        tileMode = TileMode.clamp;
-                      });
-                    }
-                ),
+                  setState(() {
+                    tileMode = TileMode.clamp;
+                  });
+                }),
                 _bottomBarItem('Mirror',
                     color: tileMode == TileMode.mirror ? Colors.blue : null,
                     onPress: () {
-                      setState(() {
-                        tileMode = TileMode.mirror;
-                      });
-                    }
-                ),
+                  setState(() {
+                    tileMode = TileMode.mirror;
+                  });
+                }),
                 _bottomBarItem('Repeated',
                     color: tileMode == TileMode.repeated ? Colors.blue : null,
                     onPress: () {
-                      setState(() {
-                        tileMode = TileMode.repeated;
-                      });
-                    }
-                ),
+                  setState(() {
+                    tileMode = TileMode.repeated;
+                  });
+                }),
               ],
             ),
           ),
@@ -175,13 +161,11 @@ class _BlurScreenState extends State<BlurScreen> {
     return InkWell(
       onTap: onPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Text(title,
-          style: TextStyle(
-              color: color ?? Colors.white70
-          ),
-        )
-      ),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Text(
+            title,
+            style: TextStyle(color: color ?? Colors.white70),
+          )),
     );
   }
 
@@ -191,7 +175,6 @@ class _BlurScreenState extends State<BlurScreen> {
         value: value,
         max: 10,
         min: 0.1,
-        onChanged: onChanged
-    );
+        onChanged: onChanged);
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lindi/lindi.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:photo_editor/screens/adjust_screen.dart';
 import 'package:photo_editor/screens/blur_screen.dart';
 import 'package:photo_editor/screens/crop_screen.dart';
@@ -15,7 +15,7 @@ import 'package:photo_editor/screens/text_screen.dart';
 import 'package:photo_editor/screens/tint_screen.dart';
 
 void main() {
-  LindiInjector.register(ImageViewHolder());
+  LindiInjector.register(ImageViewModel());
   runApp(const MyApp());
 }
 
@@ -29,31 +29,21 @@ class MyApp extends StatelessWidget {
       title: 'Photo Editor',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xff111111),
-        primarySwatch: Colors.blue,
-        appBarTheme: const AppBarTheme(
-          color: Colors.black,
-          centerTitle: true,
-          elevation: 0,
-          titleTextStyle: TextStyle(
-            color: Colors.white,
-            fontSize: 22
-          )
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.all(Colors.blue)
-          )
-        ),
-        iconButtonTheme: IconButtonThemeData(
-            style: ButtonStyle(
-                foregroundColor: WidgetStateProperty.all(Colors.white)
-            )
-        ),
-        sliderTheme: const SliderThemeData(
-          showValueIndicator: ShowValueIndicator.always
-        )
-      ),
+          scaffoldBackgroundColor: const Color(0xff111111),
+          primarySwatch: Colors.blue,
+          appBarTheme: const AppBarTheme(
+              color: Colors.black,
+              centerTitle: true,
+              elevation: 0,
+              titleTextStyle: TextStyle(color: Colors.white, fontSize: 22)),
+          textButtonTheme: TextButtonThemeData(
+              style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all(Colors.blue))),
+          iconButtonTheme: IconButtonThemeData(
+              style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all(Colors.white))),
+          sliderTheme: const SliderThemeData(
+              showValueIndicator: ShowValueIndicator.always)),
       routes: <String, WidgetBuilder>{
         '/': (_) => const StartScreen(),
         '/home': (_) => const HomeScreen(),

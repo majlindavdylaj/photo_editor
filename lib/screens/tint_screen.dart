@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:lindi/lindi.dart';
 import 'package:photo_editor/helper/tints.dart';
-import 'package:photo_editor/lindi/image_viewholder.dart';
+import 'package:photo_editor/lindi/image_view_model.dart';
 import 'package:photo_editor/model/tint.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -15,8 +15,7 @@ class TintScreen extends StatefulWidget {
 }
 
 class _TintScreenState extends State<TintScreen> {
-
-  late ImageViewHolder imageViewHolder;
+  late ImageViewModel imageViewModel;
   ScreenshotController screenshotController = ScreenshotController();
   late List<Tint> tints;
 
@@ -24,7 +23,7 @@ class _TintScreenState extends State<TintScreen> {
 
   @override
   void initState() {
-    imageViewHolder = LindiInjector.get<ImageViewHolder>();
+    imageViewModel = LindiInjector.get<ImageViewModel>();
     tints = Tints().list();
     super.initState();
   }
@@ -39,25 +38,26 @@ class _TintScreenState extends State<TintScreen> {
           IconButton(
               onPressed: () async {
                 Uint8List? bytes = await screenshotController.capture();
-                imageViewHolder.changeImage(bytes!);
-                if(!mounted) return;
+                imageViewModel.changeImage(bytes!);
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.done)
-          )
+              icon: const Icon(Icons.done))
         ],
       ),
       body: Stack(
         children: [
           Center(
             child: LindiBuilder(
-              viewModel: imageViewHolder,
+              viewModel: imageViewModel,
               builder: (BuildContext context) {
-                if (imageViewHolder.currentImage != null) {
+                if (imageViewModel.currentImage != null) {
                   return Screenshot(
                     controller: screenshotController,
-                    child: Image.memory(imageViewHolder.currentImage!,
-                      color: tints[index].color.withOpacity(tints[index].opacity),
+                    child: Image.memory(
+                      imageViewModel.currentImage!,
+                      color:
+                          tints[index].color.withOpacity(tints[index].opacity),
                       colorBlendMode: BlendMode.color,
                     ),
                   );
@@ -75,12 +75,11 @@ class _TintScreenState extends State<TintScreen> {
               children: [
                 slider(
                     value: tints[index].opacity,
-                    onChanged: (value){
+                    onChanged: (value) {
                       setState(() {
                         tints[index].opacity = value;
                       });
-                    }
-                ),
+                    }),
               ],
             ),
           )
@@ -91,37 +90,35 @@ class _TintScreenState extends State<TintScreen> {
         height: 100,
         color: Colors.black,
         child: SafeArea(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: tints.length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (BuildContext context, int index) {
-              Tint tint = tints[index];
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    this.index = index;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12, horizontal: 8
-                  ),
-                  child: CircleAvatar(
-                    backgroundColor: this.index == index
-                        ? Colors.white : Colors.transparent,
-                    child: Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: CircleAvatar(
-                        backgroundColor: tint.color,
-                      ),
+            child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: tints.length,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (BuildContext context, int index) {
+            Tint tint = tints[index];
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  this.index = index;
+                });
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: CircleAvatar(
+                  backgroundColor:
+                      this.index == index ? Colors.white : Colors.transparent,
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: CircleAvatar(
+                      backgroundColor: tint.color,
                     ),
                   ),
                 ),
-              );
-            },
-          )
-        ),
+              ),
+            );
+          },
+        )),
       ),
     );
   }
@@ -132,7 +129,6 @@ class _TintScreenState extends State<TintScreen> {
         value: value,
         max: 1,
         min: 0,
-        onChanged: onChanged
-    );
+        onChanged: onChanged);
   }
 }
